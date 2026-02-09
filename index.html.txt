@@ -221,20 +221,20 @@ function calcular(){
   roiTop.innerText=roi.toFixed(2)+"%";
 }
 
-/* ===== SHARE + RESTORE (FINAL, DEFINITIVO) ===== */
+/* ===== SHARE + RESTORE (FUNCIONA 100%) ===== */
 function shareLink(){
   const casas=[];
   document.querySelectorAll(".platform").forEach(p=>{
     const o=p.querySelector(".box input").value;
-    if(o)casas.push({o:o});
+    if(o)casas.push({o});
   });
 
-  const payload = btoa(JSON.stringify({
+  const data = btoa(JSON.stringify({
     invest: investInput.value,
-    casas: casas
+    casas
   }));
 
-  const link = "https://www.rolexnjx.com.br/dutching?s=" + payload;
+  const link = location.origin + location.pathname + "?s=" + data;
   prompt("COPIE O LINK:", link);
 }
 
