@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>EasyBet – Dutching</title>
+
+<style>
+:root {
+  --bg:#0b1220;
+  --card:rgba(20,30,45,0.85);
+  --border:rgba(255,255,255,0.08);
+  --green:#3bb54a;
+  --text-muted:rgba(255,255,255,0.6);
+  --orange:#ff8a2a;
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+body{
+  background:radial-gradient(circle at top,#18253b,#070b14);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+}
+.wrapper{
+  width:430px;
+  padding:22px;
+  border-radius:20px;
+  backdrop-filter:blur(18px);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.4));
+}
+.top-card{
+  background:linear-gradient(145deg,#b0b0b0,#8c8c8c);
+  border-radius:18px;
+  padding:28px;
+  text-align:center;
+}
+.logo{font-size:34px;font-weight:800}
+.logo .easy{color:var(--orange)}
+.logo .bet{color:#5e5e5e}
+.percent{font-size:46px;font-weight:800;color:#2f7d32;margin-top:10px}
+.subtitle{font-size:13px;letter-spacing:1px;color:#215c28}
+.section-title{
+  margin:26px 0 12px;
+  text-align:center;
+  font-size:14px;
+  color:var(--text-muted);
+}
+.row{display:flex;gap:12px}
+.input-card{
+  flex:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+}
+.input-card.green{
+  background:linear-gradient(135deg,rgba(40,120,80,.4),rgba(30,70,55,.4));
+}
+.input-card label{font-size:12px;color:var(--text-muted)}
+.input-card input{
+  width:100%;
+  margin-top:6px;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  font-size:18px;
+}
+.divider{
+  margin:26px 0;
+  border-top:1px dashed rgba(255,255,255,.1);
+}
+.platform{
+  display:grid;
+  grid-template-columns:1fr 90px 110px;
+  gap:10px;
+  align-items:center;
+  margin-bottom:14px;
+}
+.platform-name{font-weight:600}
+.box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  text-align:center;
+}
+.box input{
+  width:100%;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  text-align:center;
+}
+.add-btn,.share-btn{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px dashed var(--border);
+  background:transparent;
+  color:var(--text-muted);
+  cursor:pointer;
+}
+.share-btn{border-style:solid;color:#fff}
+.footer{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  margin-top:24px;
+  text-align:center;
+}
+.footer div{font-size:12px;color:var(--text-muted)}
+.footer span{
+  display:block;
+  margin-top:6px;
+  font-size:20px;
+  font-weight:700;
+}
+.green{color:var(--green)}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+  <div class="top-card">
+    <div class="logo"><span class="easy">EASY</span><span class="bet">BET</span></div>
+    <div class="percent" id="roiTop">0.00%</div>
+    <div class="subtitle">LUCRO GARANTIDO</div>
+  </div>
+
+  <div class="section-title">QUANTO DESEJA APOSTAR?</div>
+
+  <div class="row">
+    <div class="input-card">
+      <label>Investir</label>
+      <input id="invest">
+    </div>
+    <div class="input-card green">
+      <label>Retorna</label>
+      <input id="retorna" disabled>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div id="platforms"></div>
+
+  <button class="add-btn" onclick="addPlatform()">+ Adicionar Plataforma</button>
+  <button class="share-btn" onclick="shareLink()">🔗 Compartilhar</button>
+
+  <div class="divider"></div>
+
+  <div class="footer">
+    <div>ROI<span id="roi">0.00%</span></div>
+    <div>LUCRO<span class="green" id="lucro">0.00</span></div>
+    <div>RETORNA<span id="retornoFinal">0.00</span></div>
+  </div>
+</div>
+
+<script>
+let platformCount = 0;
+
+function formatOdd(i){
+  let v = i.value.replace(/\D/g,"");
+  if(!v){i.value="";return;}
+  if(v.length===1)i.value=v;
+  else if(v.length===2)i.value=v[0]+"."+v[1];
+  else if(v.length===3)i.value=v[0]+"."+v.slice(1);
+  else i.value=v.slice(0,2)+"."+v.slice(2,4);
+}
+
+function addPlatform(value=""){
+  platformCount++;
+  const d=document.createElement("div");
+  d.className="platform";
+  d.innerHTML=`
+    <div class="platform-name">PLATAFORMA ${platformCount}</div>
+    <div class="box">
+      <input placeholder="Odd" value="${value}" oninput="formatOdd(this);calcular()">
+    </div>
+    <div class="box">
+      <input placeholder="Aposta" disabled>
+    </div>`;
+  platforms.appendChild(d);
+}
+
+function calcular(){
+  const invest=parseFloat(investInput.value);
+  if(!invest)return;
+
+  const ps=document.querySelectorAll(".platform");
+  const odds=[];
+
+  ps.forEach(p=>{
+    const o=parseFloat(p.querySelector(".box input").value);
+    if(o>1)odds.push(o);
+  });
+  if(odds.length<2)return;
+
+  const soma=odds.reduce((s,o)=>s+(1/o),0);
+  const retorno=invest/soma;
+
+  ps.forEach(p=>{
+    const o=parseFloat(p.querySelector(".box input").value);
+    if(o>1){
+      const ap=invest*((1/o)/soma);
+      p.querySelectorAll("input")[1].value=ap.toFixed(2);
+    }
+  });
+
+  const lucro=retorno-invest;
+  const roi=(lucro/invest)*100;
+
+  retorna.value=retorno.toFixed(2);
+  retornoFinal.innerText=retorno.toFixed(2);
+  lucroEl.innerText=lucro.toFixed(2);
+  roiEl.innerText=roi.toFixed(2)+"%";
+  roiTop.innerText=roi.toFixed(2)+"%";
+}
+
+/* ===== SHARE + RESTORE (FINAL, ESTÁVEL) ===== */
+function shareLink(){
+  const casas=[];
+  document.querySelectorAll(".platform").forEach(p=>{
+    const o=p.querySelector(".box input").value;
+    if(o)casas.push({o});
+  });
+
+  const payload={
+    invest: investInput.value,
+    casas
+  };
+
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  const link = location.origin + location.pathname + "?s=" + encoded;
+  prompt("COPIE O LINK:", link);
+}
+
+function restoreFromLink(){
+  const params=new URLSearchParams(window.location.search);
+  const s=params.get("s");
+  if(!s)return;
+
+  let data;
+  try{
+    data=JSON.parse(decodeURIComponent(s));
+  }catch(e){
+    return;
+  }
+
+  platforms.innerHTML="";
+  platformCount=0;
+
+  if(Array.isArray(data.casas)){
+    data.casas.forEach(c=>addPlatform(c.o||""));
+  }
+
+  investInput.value=data.invest||"";
+  setTimeout(calcular,100);
+}
+/* ================================= */
+
+const investInput=document.getElementById("invest");
+const retorna=document.getElementById("retorna");
+const roiEl=document.getElementById("roi");
+const lucroEl=document.getElementById("lucro");
+const retornoFinal=document.getElementById("retornoFinal");
+const roiTop=document.getElementById("roiTop");
+const platforms=document.getElementById("platforms");
+
+investInput.addEventListener("input",calcular);
+
+addPlatform();
+addPlatform();
+restoreFromLink();
+</script>
+
+</body>
+</html>
