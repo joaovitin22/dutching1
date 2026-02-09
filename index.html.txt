@@ -221,7 +221,7 @@ function calcular(){
   roiTop.innerText=roi.toFixed(2)+"%";
 }
 
-/* ===== SHARE + RESTORE (FUNCIONA 100%) ===== */
+/* ===== SHARE + RESTORE (CORRIGIDO DEFINITIVO) ===== */
 function shareLink(){
   const casas=[];
   document.querySelectorAll(".platform").forEach(p=>{
@@ -229,20 +229,20 @@ function shareLink(){
     if(o)casas.push({o});
   });
 
-  const data = btoa(JSON.stringify({
-    invest: investInput.value,
+  const data=btoa(JSON.stringify({
+    invest:investInput.value,
     casas
   }));
 
-  const link = location.origin + location.pathname + "?s=" + data;
-  prompt("COPIE O LINK:", link);
+  const link="https://joaovitin22.github.io/dutching1/?s="+data;
+  prompt("COPIE O LINK:",link);
 }
 
 function restoreFromLink(){
   const p=new URLSearchParams(window.location.search);
   if(!p.get("s"))return;
 
-  const data = JSON.parse(atob(p.get("s")));
+  const data=JSON.parse(atob(p.get("s")));
 
   platforms.innerHTML="";
   platformCount=0;
@@ -250,7 +250,7 @@ function restoreFromLink(){
   data.casas.forEach(c=>addPlatform(c.o));
   investInput.value=data.invest;
 
-  setTimeout(()=>calcular(),50);
+  setTimeout(calcular,50);
 }
 /* ================================= */
 
