@@ -161,10 +161,10 @@ body{
 </div>
 
 <script>
-let platformCount=0;
+let platformCount = 0;
 
 function formatOdd(i){
-  let v=i.value.replace(/\D/g,"");
+  let v = i.value.replace(/\D/g,"");
   if(!v){i.value="";return;}
   if(v.length===1)i.value=v;
   else if(v.length===2)i.value=v[0]+"."+v[1];
@@ -221,7 +221,7 @@ function calcular(){
   roiTop.innerText=roi.toFixed(2)+"%";
 }
 
-/* ===== SHARE + RESTORE (CORRIGIDO DEFINITIVO) ===== */
+/* ===== SHARE + RESTORE (FINAL, ESTÁVEL) ===== */
 function shareLink(){
   const casas=[];
   document.querySelectorAll(".platform").forEach(p=>{
@@ -229,28 +229,37 @@ function shareLink(){
     if(o)casas.push({o});
   });
 
-  const data=btoa(JSON.stringify({
-    invest:investInput.value,
+  const payload={
+    invest: investInput.value,
     casas
-  }));
+  };
 
-  const link="https://joaovitin22.github.io/dutching1/?s="+data;
-  prompt("COPIE O LINK:",link);
+  const encoded = encodeURIComponent(JSON.stringify(payload));
+  const link = location.origin + location.pathname + "?s=" + encoded;
+  prompt("COPIE O LINK:", link);
 }
 
 function restoreFromLink(){
-  const p=new URLSearchParams(window.location.search);
-  if(!p.get("s"))return;
+  const params=new URLSearchParams(window.location.search);
+  const s=params.get("s");
+  if(!s)return;
 
-  const data=JSON.parse(atob(p.get("s")));
+  let data;
+  try{
+    data=JSON.parse(decodeURIComponent(s));
+  }catch(e){
+    return;
+  }
 
   platforms.innerHTML="";
   platformCount=0;
 
-  data.casas.forEach(c=>addPlatform(c.o));
-  investInput.value=data.invest;
+  if(Array.isArray(data.casas)){
+    data.casas.forEach(c=>addPlatform(c.o||""));
+  }
 
-  setTimeout(calcular,50);
+  investInput.value=data.invest||"";
+  setTimeout(calcular,100);
 }
 /* ================================= */
 
